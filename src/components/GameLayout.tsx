@@ -117,11 +117,11 @@ export function GameLayout() {
           <div className="space-y-2">
             <div className="rounded bg-slate-800 p-2">
               🧴 Rak Blister Obat
-              <div className="text-[10px] text-gray-500">(pengambilan otomatis di prototipe)</div>
+              <div className="text-[10px] text-gray-500">Pengambilan otomatis saat resep diterima</div>
             </div>
             <div className="rounded bg-slate-800 p-2">
-              ⚗️ Mortir & Stamper
-              <div className="text-[10px] text-gray-500">(racik puyer — fase 2)</div>
+              ⚗️ Mortir &amp; Stamper
+              <div className="text-[10px] text-gray-500">Aktif untuk resep racikan puyer</div>
             </div>
             <div className="rounded bg-slate-800 p-2">
               🏷️ Dispenser Etiket
@@ -132,7 +132,7 @@ export function GameLayout() {
             </div>
             <div className="rounded bg-slate-800 p-2">
               🔔 Bel Interkom
-              <div className="text-[10px] text-gray-500">(substitusi generik — fase 2)</div>
+              <div className="text-[10px] text-gray-500">Salinan resep &amp; konfirmasi ke pasien</div>
             </div>
           </div>
         </div>

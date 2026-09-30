@@ -1,0 +1,73 @@
+<svg width="960" height="540" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Apotek Jaga animated gameplay loop">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1220"/><stop offset="1" stop-color="#05070d"/>
+    </linearGradient>
+    <linearGradient id="paper2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4ecd8"/><stop offset="1" stop-color="#e6dcc3"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#bg2)"/>
+
+  <!-- top bar -->
+  <rect width="960" height="28" fill="#020617"/>
+  <text x="14" y="19" font-family="system-ui, sans-serif" font-size="12" font-weight="800" fill="#67e8f9">APOTEK JAGA · SHIFT MALAM</text>
+  <text x="820" y="19" font-family="system-ui, sans-serif" font-size="11" fill="#86efac">Kas: Rp 620.000</text>
+
+  <!-- caption that changes per step -->
+  <text x="480" y="512" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#cbd5e1">
+    <tspan>Pasien datang ke loket…</tspan>
+    <animate attributeName="opacity" values="1;1;1;1" dur="12s" repeatCount="indefinite"/>
+  </text>
+  <g font-family="system-ui, sans-serif" font-size="15" fill="#cbd5e1" text-anchor="middle">
+    <text x="480" y="512" opacity="0">Baca resep &amp; cek SIM-Apotek…<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.25;0.33;0.5;0.58;1" dur="12s" repeatCount="indefinite"/></text>
+    <text x="480" y="512" opacity="0">SIP kadaluarsa terdeteksi → TOLAK<animate attributeName="opacity" values="0;0;0;0;1;1;0;0" keyTimes="0;0.5;0.58;0.62;0.66;0.82;0.9;1" dur="12s" repeatCount="indefinite"/></text>
+  </g>
+
+  <!-- prescription paper sliding in -->
+  <g>
+    <g transform="translate(360,120)">
+      <rect width="240" height="300" rx="2" fill="url(#paper2)" stroke="#00000030"/>
+      <g font-family="'Comic Sans MS', cursive" fill="#1f2937">
+        <text x="14" y="28" font-size="13" font-weight="700">dr. Hendra Wijaya</text>
+        <text x="14" y="46" font-size="9">Klinik Lama Sejahtera</text>
+        <text x="14" y="60" font-size="9">SIP: SIP.446/0912/DINKES/2019</text>
+        <line x1="10" y1="70" x2="230" y2="70" stroke="#00000050"/>
+        <text x="14" y="100" font-size="14" font-style="italic" font-weight="700">R/ Alprazolam 0.5mg</text>
+        <text x="40" y="120" font-size="12">No. XX</text>
+        <text x="40" y="140" font-size="11" font-style="italic">S 1 dd tab 1 malam</text>
+        <line x1="10" y1="256" x2="230" y2="256" stroke="#00000050"/>
+        <text x="14" y="278" font-size="10" font-weight="700">Pro: (calo)</text>
+      </g>
+    </g>
+    <animateTransform attributeName="transform" type="translate" values="0 300; 0 0; 0 0; 0 0; 0 0; 0 300" keyTimes="0;0.12;0.5;0.66;0.9;1" dur="12s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- SIP lookup popup -->
+  <g opacity="0">
+    <rect x="120" y="200" width="220" height="80" rx="4" fill="#c0c0c0" stroke="#808080"/>
+    <rect x="120" y="200" width="220" height="18" fill="#000080"/>
+    <text x="128" y="213" font-family="monospace" font-size="10" fill="#fff">F4: Master SIP</text>
+    <text x="128" y="238" font-family="monospace" font-size="10" font-weight="700" fill="#b91c1c">✗ SIP KADALUARSA</text>
+    <text x="128" y="256" font-family="monospace" font-size="9" fill="#000">Berlaku s.d. 2022-08-01</text>
+    <animate attributeName="opacity" values="0;0;0;1;1;0;0" keyTimes="0;0.33;0.4;0.45;0.6;0.66;1" dur="12s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- REJECT stamp slamming down -->
+  <g opacity="0">
+    <g transform="translate(420,230)">
+      <rect x="0" y="0" width="120" height="70" rx="4" fill="#b91c1c" stroke="#7f1d1d" stroke-width="4" transform="rotate(-8)"/>
+      <text x="60" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="800" fill="#fff" transform="rotate(-8)">TOLAK</text>
+    </g>
+    <animate attributeName="opacity" values="0;0;0;0;0;1;1;0" keyTimes="0;0.6;0.63;0.64;0.65;0.66;0.86;1" dur="12s" repeatCount="indefinite"/>
+    <animateTransform attributeName="transform" type="scale" additive="sum" values="1.6;1;1" keyTimes="0;0.68;1" dur="12s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- feedback flash -->
+  <rect x="0" y="0" width="960" height="540" fill="#052e16" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0.35;0;0" keyTimes="0;0.7;0.72;0.76;0.82;1" dur="12s" repeatCount="indefinite"/>
+  </rect>
+  <text x="480" y="270" text-anchor="middle" font-family="system-ui, sans-serif" font-size="26" font-weight="800" fill="#86efac" opacity="0">✓ Keputusan Tepat
+    <animate attributeName="opacity" values="0;0;0;1;1;0;0" keyTimes="0;0.72;0.74;0.78;0.86;0.9;1" dur="12s" repeatCount="indefinite"/>
+  </text>
+</svg>

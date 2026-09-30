@@ -1,11 +1,112 @@
-<svg width="960" height="540" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg">
-  <rect width="960" height="540" fill="#0b1220"/>
-  <rect x="16" y="60" width="320" height="440" fill="#c0c0c0" rx="4"/>
-  <rect x="16" y="60" width="320" height="22" fill="#000080"/>
-  <text x="176" y="76" text-anchor="middle" font-family="monospace" font-size="11" fill="#fff">SIM-APOTEK PRIMA v3.2</text>
-  <rect x="352" y="60" width="380" height="440" fill="#1e293b" rx="4"/>
-  <rect x="470" y="120" width="150" height="200" fill="#f4ecd8" rx="2"/>
-  <text x="545" y="220" text-anchor="middle" font-family="cursive" font-size="12" fill="#000">R/ ...</text>
-  <rect x="748" y="60" width="196" height="440" fill="#0f172a" rx="4"/>
-  <text x="480" y="520" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#64748b">Gameplay placeholder — replace with docs/screenshot-gameplay.png</text>
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Apotek Jaga gameplay">
+  <defs>
+    <linearGradient id="deskbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1220"/><stop offset="1" stop-color="#05070d"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4ecd8"/><stop offset="1" stop-color="#e6dcc3"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#deskbg)"/>
+
+  <!-- HUD -->
+  <rect x="0" y="0" width="1280" height="30" fill="#020617"/>
+  <text x="16" y="20" font-family="system-ui, sans-serif" font-size="13" font-weight="800" fill="#67e8f9">APOTEK JAGA · SHIFT MALAM</text>
+  <rect x="250" y="6" width="120" height="18" rx="3" fill="#6b21a8"/>
+  <text x="310" y="19" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#f3e8ff">⚡ Waspada LASA</text>
+  <text x="720" y="20" font-family="system-ui, sans-serif" font-size="12" fill="#cbd5e1">Hari 3</text>
+  <text x="790" y="20" font-family="system-ui, sans-serif" font-size="12" fill="#cbd5e1">Pasien 2/5</text>
+  <text x="880" y="20" font-family="system-ui, sans-serif" font-size="12" fill="#cbd5e1">Aturan: R1 R2 R3 R4</text>
+  <text x="1040" y="20" font-family="system-ui, sans-serif" font-size="12" fill="#86efac">Kas: Rp 620.000</text>
+  <text x="1190" y="20" font-family="system-ui, sans-serif" font-size="12" fill="#86efac">Rep 96</text>
+
+  <!-- LEFT: SIM-Apotek (35%) -->
+  <g transform="translate(12,42)">
+    <rect width="424" height="666" rx="4" fill="#000"/>
+    <rect x="4" y="4" width="416" height="658" fill="#c0c0c0"/>
+    <rect x="4" y="4" width="416" height="20" fill="#000080"/>
+    <text x="12" y="18" font-family="monospace" font-size="11" fill="#fff">SIM-APOTEK PRIMA v3.2 — [KASIR &amp; DISPENSING]</text>
+    <!-- tabs -->
+    <g font-family="monospace" font-size="10" fill="#000">
+      <rect x="10" y="30" width="96" height="18" fill="#dfdfdf" stroke="#808080"/><text x="16" y="43">F1: Tebus Resep</text>
+      <rect x="110" y="30" width="96" height="18" fill="#c0c0c0" stroke="#808080"/><text x="116" y="43">F2: Formularium</text>
+      <rect x="210" y="30" width="80" height="18" fill="#c0c0c0" stroke="#808080"/><text x="216" y="43">F3: Cek Stok</text>
+      <rect x="294" y="30" width="90" height="18" fill="#c0c0c0" stroke="#808080"/><text x="300" y="43">F4: Master SIP</text>
+    </g>
+    <!-- patient bar -->
+    <rect x="10" y="52" width="404" height="18" fill="#c0c0c0" stroke="#808080"/>
+    <text x="14" y="65" font-family="monospace" font-size="10" fill="#000">Pasien: Dewi Lestari   Usia: 34 th   BB: -</text>
+    <!-- grid -->
+    <rect x="10" y="74" width="404" height="150" fill="#fff" stroke="#808080"/>
+    <g font-family="monospace" font-size="10">
+      <rect x="10" y="74" width="404" height="18" fill="#e5e7eb"/>
+      <text x="16" y="87" fill="#000">KODE   NAMA OBAT            GOL   QTY  DM/hari   HARGA</text>
+      <text x="16" y="106" fill="#000">MEF500 Asam Mefenamat 500mg</text>
+      <rect x="250" y="97" width="70" height="12" rx="2" fill="#b91c1c"/><text x="255" y="106" fill="#fff">KERAS</text>
+      <text x="330" y="106" fill="#000">15   1500 mg</text>
+      <text x="16" y="126" fill="#b45309">⚠ LASA — mirip Asam Traneksamat</text>
+    </g>
+    <!-- interaction alert -->
+    <rect x="10" y="232" width="404" height="54" fill="#fef08a" stroke="#b91c1c"/>
+    <text x="16" y="250" font-family="monospace" font-size="10" font-weight="700" fill="#b91c1c">[ ! ] STATUS INTERAKSI</text>
+    <text x="16" y="266" font-family="monospace" font-size="9" fill="#000">Tidak ada interaksi mayor terdeteksi.</text>
+    <text x="16" y="279" font-family="monospace" font-size="9" fill="#000">Cocokkan keluhan pasien dengan indikasi obat (R4).</text>
+    <!-- ped dose calc -->
+    <rect x="10" y="296" width="404" height="40" fill="#eff6ff" stroke="#93c5fd"/>
+    <text x="16" y="312" font-family="monospace" font-size="9" font-weight="700" fill="#1e40af">🧮 Kalkulator DM Anak (dewasa — tidak berlaku)</text>
+  </g>
+
+  <!-- CENTER: patient window + prescription + stamps (40%) -->
+  <g transform="translate(448,42)">
+    <!-- patient window -->
+    <rect width="512" height="70" rx="6" fill="#1e293b" stroke="#0e7490" stroke-opacity="0.4"/>
+    <circle cx="42" cy="35" r="20" fill="#334155"/><text x="42" y="42" text-anchor="middle" font-size="20">🧑</text>
+    <text x="76" y="26" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#a5f3fc">Dewi Lestari</text>
+    <rect x="76" y="34" width="380" height="20" rx="3" fill="#0f172a"/>
+    <text x="84" y="48" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#cbd5e1">"Saya sering mimisan, kata dokter butuh asam traneksamat."</text>
+
+    <!-- prescription paper -->
+    <g transform="translate(150,86)">
+      <rect width="230" height="330" rx="2" fill="url(#paper)" stroke="#00000030"/>
+      <g font-family="'Comic Sans MS', cursive" fill="#1f2937">
+        <text x="14" y="30" font-size="14" font-weight="700">dr. Reza Pratama</text>
+        <text x="14" y="48" font-size="10">Puskesmas Melati</text>
+        <text x="14" y="63" font-size="10">SIP: SIP.446/1874/DINKES/2022</text>
+        <text x="14" y="78" font-size="10">Tanggal: 2026-09-28</text>
+        <line x1="10" y1="86" x2="220" y2="86" stroke="#00000050"/>
+        <text x="14" y="118" font-size="15" font-style="italic" font-weight="700">R/</text>
+        <text x="40" y="118" font-size="14">Asam Mefenamat 500mg</text>
+        <text x="40" y="136" font-size="13">No. XV</text>
+        <text x="40" y="156" font-size="12" font-style="italic">S 3 dd tab 1 p.c.</text>
+        <text x="40" y="174" font-size="12" font-style="italic" fill="#4b5563">— paraf —</text>
+        <line x1="10" y1="286" x2="220" y2="286" stroke="#00000050"/>
+        <text x="14" y="306" font-size="11" font-weight="700">Pro: Dewi Lestari</text>
+        <text x="14" y="322" font-size="11">Umur: 34 th</text>
+      </g>
+    </g>
+
+    <!-- stamps -->
+    <g transform="translate(150,430)">
+      <rect x="0" y="0" width="96" height="56" rx="3" fill="#15803d" stroke="#14532d" stroke-width="3"/>
+      <text x="48" y="34" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="800" fill="#fff">TERIMA</text>
+      <text x="48" y="76" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">[A]</text>
+      <rect x="136" y="0" width="96" height="56" rx="3" fill="#b91c1c" stroke="#7f1d1d" stroke-width="3"/>
+      <text x="184" y="34" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="800" fill="#fff">TOLAK</text>
+      <text x="184" y="76" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">[D]</text>
+    </g>
+  </g>
+
+  <!-- RIGHT: shelf & dispensing (25%) -->
+  <g transform="translate(972,42)">
+    <rect width="296" height="666" rx="4" fill="#0f172a" stroke="#334155"/>
+    <text x="14" y="26" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#67e8f9">Rak &amp; Dispensing</text>
+    <g font-family="system-ui, sans-serif" font-size="12" fill="#cbd5e1">
+      <rect x="12" y="40" width="272" height="46" rx="4" fill="#1e293b"/><text x="22" y="60">🧴 Rak Blister Obat</text><text x="22" y="76" font-size="9" fill="#64748b">Pengambilan otomatis saat diterima</text>
+      <rect x="12" y="94" width="272" height="46" rx="4" fill="#1e293b"/><text x="22" y="114">⚗️ Mortir &amp; Stamper</text><text x="22" y="130" font-size="9" fill="#64748b">Aktif untuk resep racikan puyer</text>
+      <rect x="12" y="148" width="272" height="60" rx="4" fill="#1e293b"/><text x="22" y="168">🏷️ Dispenser Etiket</text>
+      <rect x="22" y="178" width="70" height="18" rx="3" fill="#fff"/><text x="30" y="191" font-size="9" fill="#000">PUTIH · dalam</text>
+      <rect x="100" y="178" width="60" height="18" rx="3" fill="#2563eb"/><text x="108" y="191" font-size="9" fill="#fff">BIRU · luar</text>
+      <rect x="12" y="216" width="272" height="46" rx="4" fill="#1e293b"/><text x="22" y="236">🔔 Bel Interkom</text><text x="22" y="252" font-size="9" fill="#64748b">Salinan resep &amp; konfirmasi ke pasien</text>
+    </g>
+  </g>
 </svg>

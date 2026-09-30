@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>A first-person, tactile pharmacy prescription verification &amp; dispensing simulator.</b><br/>
-  Educational · Indonesian community-pharmacy setting · 100% client-side · zero backend · zero AI at runtime.
+  Educational · Indonesian community-pharmacy setting · 100% client-side · works offline.
 </p>
 
 <p align="center">
@@ -18,27 +18,31 @@
 
 ---
 
-## What is this?
+## Overview
 
 **Apotek Jaga: Shift Malam** ("Pharmacy Night Watch") is a document-verification game in the spirit of *Papers, Please*, set in the quiet, neon-lit night shift of an Indonesian community pharmacy (*apotek*).
 
 You play a pharmacist. Patients slide prescriptions through the acrylic-glass window. You inspect each prescription, cross-check it against the retro pharmacy software (**SIM-Apotek Prima v3.2**), and decide: **dispense** or **refuse** — while keeping patients safe and your pharmacy's license intact.
 
-It is built to be **educational**: every rule and trap mirrors real Indonesian pharmacy practice, and every mistake explains *which rule* was broken and *why*.
+Every rule and trap mirrors real Indonesian pharmacy practice, and every mistake explains *which rule* was broken and *why*, making the game a hands-on way to learn prescription screening.
 
-> ⚠️ This is an educational game/prototype. It is **not** medical or pharmaceutical advice. Doses, prices, and registrations are illustrative.
+> This is an educational game. It is not medical or pharmaceutical advice. Doses, prices, and registrations are illustrative.
 
-## Screenshots
+## Gameplay
 
-> These are placeholders. See [`docs/README-media.md`](docs/README-media.md) to add your own captures.
+<p align="center">
+  <img src="docs/gameplay.svg" alt="Animated gameplay loop" width="640" />
+</p>
 
-| Title | Gameplay |
-|---|---|
-| ![Title](docs/screenshot-title.svg) | ![Gameplay](docs/screenshot-gameplay.svg) |
+| Title screen | In-shift verification |
+|:---:|:---:|
+| <img src="docs/screenshot-title.svg" width="420" /> | <img src="docs/screenshot-gameplay.svg" width="420" /> |
 
-**Gameplay video:** _add `docs/gameplay.mp4` or paste a YouTube/Loom link here._
+| Compounding &amp; labelling |
+|:---:|
+| <img src="docs/screenshot-dispensing.svg" width="560" /> |
 
-## Core gameplay loop
+## The loop
 
 ```
 Patient arrives at the window
@@ -52,7 +56,7 @@ Cross-check in SIM-Apotek (F1–F4): drug class, stock, SIP lookup, interactions
       ▼
 Decide:  [A] ACCEPT   /   [D] REFUSE
       │
-      ├─ Accept a valid Rx → (grind powder if compounded) → (copy-Rx if low stock) → pick label → dispense
+      ├─ Accept a valid Rx → grind powder if compounded → copy-Rx if stock is short → pick label → dispense
       │
       ▼
 Educational feedback → next patient → end-of-shift audit (pay, reputation, bills)
@@ -61,33 +65,33 @@ Educational feedback → next patient → end-of-shift audit (pay, reputation, b
 ## Features
 
 - **Tiered rules, one per day** (like *Papers, Please*), announced by a morning newspaper:
-  - **R1** — prescription completeness (doctor, SIP, date, patient, R/, signature) + expiry
-  - **R2** — drug class vs. prescription requirement (Keras / Psikotropika / Narkotika need an Rx)
+  - **R1** — prescription completeness (doctor, SIP, date, patient, R/, signature) and expiry
+  - **R2** — drug class vs. prescription requirement (Keras / Psikotropika / Narkotika require an Rx)
   - **R3** — doctor authenticity via **SIP** lookup (registered? name match? expired?)
-  - **R4** — spoken complaint vs. prescribed therapy (catches misuse & **LASA** confusion)
-  - **R5** — pediatric **maximum daily dose** (Young / Dilling / Clark formulas)
-- **Retro pharmacy GUI** — a WinForm-style *SIM-Apotek Prima v3.2* with a drug grid, SIP master, and drug-interaction alerts. Keyboard-driven (F1–F4).
-- **Tactile dispensing:**
-  - **Etiket** (label) color: white = internal/oral, blue = external/topical
+  - **R4** — spoken complaint vs. prescribed therapy (catches misuse and **LASA** confusion)
+  - **R5** — pediatric **maximum daily dose** using Young / Dilling / Clark formulas
+- **Retro pharmacy GUI** — a WinForm-style *SIM-Apotek Prima v3.2* with a drug grid, SIP master, and drug-interaction alerts. Fully keyboard-driven (F1–F4).
+- **Tactile dispensing**
+  - **Etiket** (label) colour: white for internal/oral, blue for external/topical
   - **Puyer compounding** mini-game: grind tablets in the mortar with a circular cursor gesture
   - **Copy prescription (apograph, p.c.c)** with `det` / `ne det` when stock is short
-- **OWA (Obat Wajib Apotek)** — certain Keras drugs a pharmacist may dispense without an Rx, within limits.
-- **Procedural patients & traps** — panicking parent, controlled-substance tout, chronic (Prolanis) patient, pediatric powder, pediatric overdose, and undercover **Dinkes inspection** (mystery shopper).
-- **Shift modifiers** — *Cakar Ayam* (near-illegible handwriting), *Waspada LASA* (look-alike/sound-alike traps), *Antrian Ramai* (busy night).
-- **Diegetic economy** — salary, fines, daily bills, and a reputation meter; graduated warnings instead of instant game-over.
-- **Synthesized audio** — stamp thud, paper slide, mortar grind, bell, and result cues via the Web Audio API (no audio files → tiny bundle).
-- **100% client-side** — deploys as a static SPA. No server, no runtime AI, works offline.
+- **OWA (Obat Wajib Apotek)** — selected Keras drugs a pharmacist may dispense without an Rx, within limits.
+- **Procedural patients and traps** — panicking parent, controlled-substance tout, chronic (Prolanis) patient, pediatric powder, pediatric overdose, and undercover **Dinkes inspections** (mystery shopper).
+- **Shift modifiers** — *Cakar Ayam* (near-illegible handwriting), *Waspada LASA* (look-alike / sound-alike traps), and *Antrian Ramai* (busy night).
+- **Diegetic economy** — salary, fines, daily bills, and a reputation meter, with graduated warnings rather than instant game-over.
+- **Synthesized audio** — stamp thud, paper slide, mortar grind, bell, and result cues via the Web Audio API, with no audio files to download.
+- **100% client-side** — ships as a static SPA. No server, no runtime AI, works offline.
 
 ## Pharmacy authenticity
 
-The game encodes real practice (simplified for play):
+The game encodes real practice, simplified for play:
 
 - **Drug classes:** Bebas, Bebas Terbatas, Keras, Psikotropika, Narkotika, plus **OWA**.
-- **Latin `signa`** abbreviations (`S 3 dd tab 1 p.c.`, `u.e.`, `p.r.n.`, `m.f. pulv dtd`, …) with an in-game dictionary.
-- **SIP** issued by *Dinkes* (not IDI) — fakes are caught by unregistered numbers, name mismatches, or expiry.
+- **Latin `signa`** abbreviations (`S 3 dd tab 1 p.c.`, `u.e.`, `p.r.n.`, `m.f. pulv dtd`, and more) with an in-game dictionary.
+- **SIP** issued by *Dinkes* — fakes are caught by unregistered numbers, name mismatches, or expiry.
 - **Copy prescription / apograph** with `det` (dispensed) and `ne det` (not yet dispensed).
-- **Pediatric dosing** via **Young** (age, &lt;8y), **Dilling** (age, 8–20y), **Clark** (body weight).
-- **Major interactions** (e.g., Sildenafil + nitrate, Warfarin + Aspirin, benzodiazepine + opioid).
+- **Pediatric dosing** via Young (age, under 8y), Dilling (age, 8–20y), and Clark (body weight).
+- **Major interactions** such as Sildenafil + nitrate, Warfarin + Aspirin, and benzodiazepine + opioid.
 
 ## Tech stack
 
@@ -100,25 +104,23 @@ The game encodes real practice (simplified for play):
 | Audio | Web Audio API (synthesized SFX) |
 | Deploy | Vercel (static) |
 
-> The original brief specified Pixi.js + Howler.js. This prototype is **DOM/SVG-first** (the verification loop needs no WebGL) and uses **synthesized Web Audio** (no audio assets). A Pixi.js desk viewport is planned — see the roadmap.
-
 ## Getting started
 
 ```bash
-# install
+# install dependencies
 npm install
 
-# run dev server (http://localhost:5173)
+# run the dev server (http://localhost:5173)
 npm run dev
 
-# type-check + production build (outputs to dist/)
+# type-check and produce a production build in dist/
 npm run build
 
 # preview the production build
 npm run preview
 ```
 
-Requirements: Node 18+.
+Requires Node 18+.
 
 ### Controls
 
@@ -128,7 +130,7 @@ Requirements: Node 18+.
 | `D` | Stamp **REFUSE** |
 | `F1`–`F4` | SIM-Apotek tabs (Tebus Resep / Formularium / Cek Stok / Master SIP) |
 | `Enter` | Continue (feedback screen) |
-| mouse | Drag & zoom the prescription; grind in the mortar; pick labels |
+| Mouse | Drag and zoom the prescription; grind in the mortar; pick labels |
 
 ## Project structure
 
@@ -140,39 +142,34 @@ src/
   game/             # generator, verification engine, dose calc, day rules, RNG, modifiers
   store/            # Zustand game store (phases, economy, flow)
   types/            # shared TypeScript types
-docs/               # logo + media placeholders
+docs/               # logo, screenshots, and gameplay media
 ```
 
-## Deployment (Vercel)
+## Deployment
 
-This repo includes `vercel.json`. To deploy:
+The repository includes `vercel.json`. Import it in Vercel with the **Vite** preset (build command `npm run build`, output directory `dist`), or deploy from the CLI:
 
 ```bash
-npm i -g vercel   # if needed
-vercel            # preview
-vercel --prod     # production
+npm i -g vercel
+vercel --prod
 ```
-
-Or import the repo in the Vercel dashboard — framework preset **Vite**, build `npm run build`, output `dist`.
-
-**Live demo:** _add your Vercel URL here after deploying._
 
 ## Roadmap
 
-- [ ] Pixi.js desk viewport (scratched acrylic glass shader, powder particles)
-- [ ] More archetypes (forgetful grandpa / visual drug matching)
-- [ ] Generic substitution flow via the intercom
-- [ ] Additional formulary, doctors, and multi-item interaction cases
-- [ ] Localization (currently Bahasa Indonesia in-game with onboarding)
+- Pixi.js desk viewport (scratched acrylic-glass shader, powder particles)
+- Additional patient archetypes and multi-item interaction cases
+- Generic-substitution flow via the intercom
+- Expanded formulary and doctor registry
+- English localisation of the in-game text
 
 ## Contributing
 
-Contributions are welcome. The content is data-driven — you can add drugs, doctors, interactions, and patient archetypes with small edits under `src/data/` and `src/game/`. Please keep pharmacy facts accurate and cite sources in your PR when adding clinical content.
+Contributions are welcome. The content is data-driven — you can add drugs, doctors, interactions, and patient archetypes with small edits under `src/data/` and `src/game/`. Please keep pharmacy facts accurate and cite sources when adding clinical content.
 
 ## License
 
-[MIT](LICENSE) — free to use, modify, and learn from.
+Released under the [MIT License](LICENSE).
 
 ## Acknowledgements
 
-Inspired by *Papers, Please* by Lucas Pope, and by the real, quiet dedication of Indonesian night-shift pharmacists.
+Inspired by *Papers, Please* by Lucas Pope, and by the quiet dedication of Indonesian night-shift pharmacists.
