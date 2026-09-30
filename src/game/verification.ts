@@ -6,6 +6,7 @@ import type {
 } from '@/types';
 import { DRUG_BY_CODE, requiresPrescription } from '@/data/formulary';
 import { lookupDoctor } from '@/data/doctorRegistry';
+import { isOwa } from '@/data/owaList';
 
 // Tanggal "sekarang" dalam dunia game (untuk cek kadaluarsa SIP & umur resep).
 export const GAME_TODAY = new Date('2026-09-30');
@@ -80,6 +81,8 @@ function checkNoPrescriptionRequest(patient: Patient): Violation | null {
   if (!patient.requestedDrugCode) return null;
   const drug = DRUG_BY_CODE[patient.requestedDrugCode];
   if (!drug) return null;
+  // OWA (Obat Wajib Apotek) boleh diserahkan apoteker tanpa resep.
+  if (isOwa(patient.requestedDrugCode)) return null;
   if (requiresPrescription(drug.drugClass)) {
     return {
       rule: 'R2',

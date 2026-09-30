@@ -9,7 +9,7 @@ import type {
 } from '@/types';
 import { generateShift } from '@/game/prescriptionGenerator';
 import { verify } from '@/game/verification';
-import { rulesForDay, MAX_DAY } from '@/game/dayRules';
+import { rulesForDay, MAX_DAY, COPY_RESEP_UNLOCK_DAY } from '@/game/dayRules';
 import { playSfx } from '@/audio/sfx';
 import { DRUG_BY_CODE } from '@/data/formulary';
 
@@ -47,6 +47,7 @@ interface GameState {
   // dispensing (etiket)
   dispenseItems: DispenseItem[];
   pulvTarget: number; // jumlah bungkus puyer target (racikan)
+  stockShortInfo: StockShortInfo | null;
 
   // actions
   startGame: () => void;
@@ -54,6 +55,7 @@ interface GameState {
   beginShift: () => void;
   decide: (decision: StampDecision) => void;
   finishCompounding: () => void;
+  finishCopyResep: (issued: boolean) => void;
   finishDispensing: (labels: LabelColor[]) => void;
   nextPatient: () => void;
   nextDay: () => void;
@@ -63,6 +65,30 @@ interface GameState {
 export interface DispenseItem {
   drugName: string;
   correctLabel: LabelColor; // PUTIH utk DALAM, BIRU utk LUAR
+}
+
+export interface StockShortInfo {
+  drugName: string;
+  requested: number;
+  available: number;
+}
+
+// Cari item stok-kurang pada resep (untuk copy resep).
+function computeStockShort(
+  items: { drugCode: string; drugName: string; quantity: number; stockShort?: boolean; availableQty?: number }[],
+): StockShortInfo | null {
+  const it = items.find((i) => i.stockShort);
+  if (!it) return null;
+  return {
+    drugName: DRUG_BY_CODE[it.drugCode]?.name ?? it.drugName,
+    requested: it.quantity,
+    available: it.availableQty ?? 0,
+  };
+}
+
+// Fase berikutnya setelah racik (atau langsung): COPY_RESEP bila stok kurang.
+function nextAfterCompound(items: { stockShort?: boolean }[]): GamePhase {
+  return items.some((i) => i.stockShort) ? 'COPY_RESEP' : 'DISPENSING';
 }
 
 type SetFn = (partial: Partial<GameState>) => void;
@@ -122,6 +148,7 @@ function makeQueue(day: number): Patient[] {
     activeRules: rules,
     mysteryShopperIndex: mysteryIndex,
     compoundingUnlocked: day >= DISPENSING_UNLOCK_DAY,
+    copyResepUnlocked: day >= COPY_RESEP_UNLOCK_DAY,
   });
 }
 
@@ -139,6 +166,7 @@ export const useGame = create<GameState>((set, get) => ({
   lastJudgement: null,
   dispenseItems: [],
   pulvTarget: 0,
+  stockShortInfo: null,
 
   startGame: () => {
     set({ phase: 'ONBOARDING' });
@@ -255,7 +283,8 @@ export const useGame = create<GameState>((set, get) => ({
         dispenseItems,
         lastJudgement: judgement, // simpan sementara, difinalisasi setelah etiket
         pulvTarget,
-        phase: hasCompound ? 'COMPOUNDING' : 'DISPENSING',
+        stockShortInfo: computeStockShort(items),
+        phase: hasCompound ? 'COMPOUNDING' : nextAfterCompound(items),
       });
       return;
     }
@@ -264,7 +293,32 @@ export const useGame = create<GameState>((set, get) => ({
   },
 
   finishCompounding: () => {
-    set({ phase: 'DISPENSING' });
+    const items = get().currentPatient?.prescription?.items ?? [];
+    set({ phase: nextAfterCompound(items) });
+  },
+
+  finishCopyResep: (issued) => {
+    const state = get();
+    const base = state.lastJudgement;
+    if (!base) return;
+    playSfx('stampWood');
+    // benar bila pemain MEMBUAT salinan resep (issued=true) saat stok kurang
+    let judgement = base;
+    if (!issued) {
+      judgement = {
+        ...base,
+        correct: false,
+        moneyDelta: base.moneyDelta - PENALTY_WRONG,
+        reputationDelta: base.reputationDelta - 5,
+        reason: `${base.reason} Namun stok kurang & Anda tidak membuat Salinan Resep (apograph p.c.c) untuk sisa obat (ne det). Pasien tidak bisa menebus sisa.`,
+      };
+    } else {
+      judgement = {
+        ...base,
+        reason: `${base.reason} Salinan Resep (p.c.c) dibuat: sebagian diserahkan (det), sisanya ditandai ne det.`,
+      };
+    }
+    set({ lastJudgement: judgement, phase: 'DISPENSING' });
   },
 
   finishDispensing: (labels) => {

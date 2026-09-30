@@ -3,6 +3,7 @@ import type { Patient } from '@/types';
 import { FORMULARY, DRUG_BY_CODE } from '@/data/formulary';
 import { DOCTOR_REGISTRY, lookupDoctor } from '@/data/doctorRegistry';
 import { findInteractions } from '@/data/interactions';
+import { isOwa, OWA_BY_CODE } from '@/data/owaList';
 import { rupiah } from '@/lib/format';
 
 type Tab = 'F1' | 'F2' | 'F3' | 'F4';
@@ -187,6 +188,17 @@ function TebusResep({
             Permintaan langsung:{' '}
             <b>{DRUG_BY_CODE[patient.requestedDrugCode]?.name}</b>{' '}
             <GolBadge cls={DRUG_BY_CODE[patient.requestedDrugCode]?.drugClass ?? ''} />
+            {isOwa(patient.requestedDrugCode) ? (
+              <div className="mt-1 rounded bg-green-100 px-1 py-0.5 text-green-800">
+                ✓ Termasuk OWA (Obat Wajib Apotek) — boleh diserahkan apoteker
+                tanpa resep. Batas: {OWA_BY_CODE[patient.requestedDrugCode].maxQtyWithoutRx}.{' '}
+                {OWA_BY_CODE[patient.requestedDrugCode].note}
+              </div>
+            ) : (
+              <div className="mt-1 rounded bg-red-100 px-1 py-0.5 text-red-800">
+                ✗ Bukan OWA & butuh resep. Tidak boleh diserahkan tanpa resep.
+              </div>
+            )}
           </div>
         )}
         <div className="mt-2 text-win-shadow">

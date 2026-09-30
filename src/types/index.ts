@@ -63,6 +63,8 @@ export interface PrescriptionItem {
   signa: Signa;
   compound?: boolean; // true jika bagian dari racikan puyer (m.f. pulv)
   pulvCount?: number; // jumlah bungkus puyer (dtd No. X)
+  stockShort?: boolean; // stok tidak cukup -> perlu copy resep
+  availableQty?: number; // jumlah yang bisa diserahkan (det), sisanya ne det
 }
 
 export interface Prescription {
@@ -91,6 +93,7 @@ export type ArchetypeId =
   | 'CALO_OOT'
   | 'KRONIS'
   | 'RACIKAN_ANAK'
+  | 'OWA_REQUEST'
   | 'MYSTERY_SHOPPER';
 
 export interface Patient {
@@ -107,7 +110,7 @@ export interface Patient {
 }
 
 // ===== Verifikasi =====
-export type RuleId = 'R1' | 'R2' | 'R3' | 'R4';
+export type RuleId = 'R1' | 'R2' | 'R3' | 'R4' | 'R5';
 
 export interface Violation {
   rule: RuleId;
@@ -140,6 +143,7 @@ export type GamePhase =
   | 'SHIFT_INTRO'
   | 'PLAYING'
   | 'COMPOUNDING'
+  | 'COPY_RESEP'
   | 'DISPENSING'
   | 'FEEDBACK'
   | 'SHIFT_SUMMARY'

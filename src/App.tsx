@@ -19,6 +19,7 @@ export default function App() {
       {(phase === 'PLAYING' ||
         phase === 'FEEDBACK' ||
         phase === 'COMPOUNDING' ||
+        phase === 'COPY_RESEP' ||
         phase === 'DISPENSING') && <GameLayout />}
       {phase === 'SHIFT_SUMMARY' && <ShiftSummaryScreen />}
       {phase === 'GAME_OVER' && <GameOverScreen />}

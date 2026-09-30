@@ -178,11 +178,19 @@ function makeCaloOOT(rng: () => number): Patient {
   };
 }
 
-function makeKronis(rng: () => number): Patient {
+function makeKronis(rng: () => number, stockShort = false): Patient {
   const doctor = pick(rng, VALID_DOCTORS);
   const name = randomName(rng);
   const codes = ['AML05', 'MTF500'];
   const items = codes.map((c) => makeItem(rng, c));
+  // stok kurang: tandai satu item -> pemain harus buat copy resep
+  if (stockShort) {
+    const idx = Math.floor(rng() * items.length);
+    const it = items[idx];
+    it.quantity = 30; // diminta 30
+    it.stockShort = true;
+    it.availableQty = randInt(rng, 8, 18); // hanya sebagian tersedia
+  }
   const rx = basePrescription(rng, doctor, name, randInt(rng, 45, 70), items);
   return {
     id: uid('pat'),
@@ -256,6 +264,26 @@ function makeRacikanAnak(rng: () => number): Patient {
   };
 }
 
+// Pasien minta obat OWA tanpa resep (mis. CTM utk alergi). Apoteker BOLEH
+// menyerahkan sesuai batas OWA -> harus DITERIMA. (edukasi OWA)
+function makeOwaRequest(rng: () => number): Patient {
+  const name = randomName(rng);
+  const code = pick(rng, ['CTM04', 'MEF500', 'HCR01']);
+  const drug = DRUG_BY_CODE[code];
+  const complaint = pick(rng, drug.indication);
+  return {
+    id: uid('pat'),
+    archetype: 'OWA_REQUEST',
+    displayName: name,
+    spokenComplaint: `Saya ${complaint}, nggak sempat ke dokter. Ada obatnya?`,
+    spokenRequest: `Minta ${drug.name} boleh?`,
+    requestedDrugCode: code,
+    prescription: null,
+    shouldAccept: true, // OWA boleh tanpa resep
+    isMysteryShopper: false,
+  };
+}
+
 const BUILDERS: Record<
   Exclude<ArchetypeId, 'MYSTERY_SHOPPER'>,
   (rng: () => number) => Patient
@@ -265,6 +293,7 @@ const BUILDERS: Record<
   CALO_OOT: makeCaloOOT,
   KRONIS: makeKronis,
   RACIKAN_ANAK: makeRacikanAnak,
+  OWA_REQUEST: makeOwaRequest,
 };
 
 // Finalisasi: hitung ground-truth shouldAccept lewat engine (semua aturan aktif),
@@ -286,6 +315,7 @@ export function generateShift(opts: {
   activeRules: RuleId[];
   mysteryShopperIndex?: number; // indeks pasien yang jadi mystery shopper
   compoundingUnlocked?: boolean; // racikan puyer muncul bila true
+  copyResepUnlocked?: boolean; // stok kurang -> copy resep bila true
 }): Patient[] {
   const rng = makeRng(opts.seed);
   const patients: Patient[] = [];
@@ -301,6 +331,9 @@ export function generateShift(opts: {
   if (opts.compoundingUnlocked) {
     archetypePool.push('RACIKAN_ANAK', 'RACIKAN_ANAK');
   }
+  if (opts.copyResepUnlocked) {
+    archetypePool.push('OWA_REQUEST');
+  }
 
   for (let i = 0; i < opts.count; i++) {
     // sisipkan mismatch (R4) sesekali
@@ -309,7 +342,12 @@ export function generateShift(opts: {
       patient = makeMismatch(rng);
     } else {
       const arch = pick(rng, archetypePool);
-      patient = BUILDERS[arch](rng);
+      // KRONIS dengan stok kurang bila copy resep sudah ter-unlock
+      if (arch === 'KRONIS' && opts.copyResepUnlocked && chance(rng, 0.5)) {
+        patient = makeKronis(rng, true);
+      } else {
+        patient = BUILDERS[arch](rng);
+      }
     }
     const isMystery = opts.mysteryShopperIndex === i;
     patients.push(finalize(patient, isMystery));

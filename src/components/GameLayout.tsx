@@ -7,6 +7,7 @@ import { StampTray } from './StampTray';
 import { FeedbackOverlay } from './FeedbackOverlay';
 import { DispensingModal } from './DispensingModal';
 import { MortarGame } from './MortarGame';
+import { CopyResepModal } from './CopyResepModal';
 import { rupiah } from '@/lib/format';
 import { playSfx, toggleMute, isMuted, unlockAudio } from '@/audio/sfx';
 
@@ -132,6 +133,7 @@ export function GameLayout() {
 
       {phase === 'FEEDBACK' && <FeedbackOverlay />}
       {phase === 'COMPOUNDING' && <MortarGame />}
+      {phase === 'COPY_RESEP' && <CopyResepModal />}
       {phase === 'DISPENSING' && <DispensingModal />}
     </div>
   );
