@@ -111,7 +111,11 @@ function basePrescription(
 function makeBiasa(rng: () => number): Patient {
   const doctor = pick(rng, VALID_DOCTORS);
   const name = randomName(rng);
-  const pool = ['PCT500', 'AMX500', 'MEF500', 'CTM04', 'GG100', 'AML05'];
+  const pool = [
+    'PCT500', 'AMX500', 'MEF500', 'CTM04', 'GG100', 'AML05',
+    'CTZ10', 'OME20', 'CPX500', 'SIM10', 'CFX01', 'SLB01',
+    'CLT01', 'DMP15', 'LOP02', 'VITC',
+  ];
   const code = pick(rng, pool);
   const drug = DRUG_BY_CODE[code];
   const complaint = pick(rng, drug.indication);
@@ -182,7 +186,14 @@ function makeCaloOOT(rng: () => number): Patient {
 function makeKronis(rng: () => number, stockShort = false): Patient {
   const doctor = pick(rng, VALID_DOCTORS);
   const name = randomName(rng);
-  const codes = ['AML05', 'MTF500'];
+  // pilih 2-3 obat kronis (valid, tanpa interaksi mayor antar mereka)
+  const combos = [
+    ['AML05', 'MTF500'],
+    ['AML05', 'SIM10'],
+    ['MTF500', 'GLI01'],
+    ['AML05', 'MTF500', 'SIM10'],
+  ];
+  const codes = pick(rng, combos);
   const items = codes.map((c) => makeItem(rng, c));
   // stok kurang: tandai satu item -> pemain harus buat copy resep
   if (stockShort) {

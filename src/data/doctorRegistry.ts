@@ -52,6 +52,38 @@ export const DOCTOR_REGISTRY: Doctor[] = [
     sipValidUntil: '2022-08-01', // KADALUARSA
     registered: true,
   },
+  {
+    name: 'dr. Putri Anggraini, Sp.OG',
+    sip: 'SIP.446/5210/DINKES/2024',
+    specialty: 'Obstetri & Ginekologi',
+    facility: 'RSIA Bunda Kasih',
+    sipValidUntil: '2027-05-20',
+    registered: true,
+  },
+  {
+    name: 'dr. Fajar Nugroho',
+    sip: 'SIP.446/6033/DINKES/2025',
+    specialty: 'Dokter Umum',
+    facility: 'Klinik 24 Jam Medika',
+    sipValidUntil: '2028-02-28',
+    registered: true,
+  },
+  {
+    name: 'dr. Lestari Dewi, Sp.M',
+    sip: 'SIP.446/6640/DINKES/2024',
+    specialty: 'Mata',
+    facility: 'RS Mata Nusantara',
+    sipValidUntil: '2027-09-01',
+    registered: true,
+  },
+  {
+    name: 'dr. Bagus Santoso, Sp.JP',
+    sip: 'SIP.446/7188/DINKES/2025',
+    specialty: 'Jantung & Pembuluh Darah',
+    facility: 'RS Jantung Harapan',
+    sipValidUntil: '2028-01-15',
+    registered: true,
+  },
 ];
 
 // Dokter TIDAK terdaftar (nama & SIP palsu) untuk perangkap resep palsu.

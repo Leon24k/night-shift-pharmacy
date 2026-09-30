@@ -46,6 +46,34 @@ export const INTERACTIONS: Interaction[] = [
     effect: 'Depresi napas & kejang',
     note: 'Kombinasi sedatif + opioid berisiko fatal. Hindari.',
   },
+  {
+    a: 'Warfarin',
+    b: 'Aspirin',
+    severity: 'MAYOR',
+    effect: 'Risiko perdarahan berat',
+    note: 'Antikoagulan + antiplatelet meningkatkan risiko perdarahan. Evaluasi ketat / hindari.',
+  },
+  {
+    a: 'Warfarin',
+    b: 'Mefenamic Acid',
+    severity: 'MAYOR',
+    effect: 'Risiko perdarahan',
+    note: 'NSAID meningkatkan efek antikoagulan warfarin & risiko perdarahan GI.',
+  },
+  {
+    a: 'Simvastatin',
+    b: 'Ciprofloxacin',
+    severity: 'SEDANG',
+    effect: 'Risiko miopati',
+    note: 'Beberapa antibiotik meningkatkan kadar statin. Pantau nyeri otot.',
+  },
+  {
+    a: 'Diazepam',
+    b: 'Codeine',
+    severity: 'MAYOR',
+    effect: 'Depresi napas',
+    note: 'Benzodiazepin + opioid: risiko depresi pernapasan. Hindari.',
+  },
 ];
 
 // Cari interaksi antar daftar zat aktif; abaikan urutan.
