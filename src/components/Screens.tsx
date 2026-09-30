@@ -1,5 +1,7 @@
 import { useGame, GAME_CONSTANTS } from '@/store/gameStore';
 import { NEW_RULE_ANNOUNCEMENT } from '@/game/dayRules';
+import { rollShiftModifier, SHIFT_MODIFIERS } from '@/game/shiftModifiers';
+import { makeRng } from '@/game/rng';
 import { rupiah } from '@/lib/format';
 import { LATIN_DICTIONARY } from '@/data/latinDictionary';
 
@@ -72,6 +74,8 @@ export function ShiftIntroScreen() {
   const day = useGame((s) => s.day);
   const beginShift = useGame((s) => s.beginShift);
   const announcement = NEW_RULE_ANNOUNCEMENT[day];
+  const modifier = rollShiftModifier(day, makeRng((day * 7919 + 13) >>> 0));
+  const modInfo = SHIFT_MODIFIERS[modifier];
   return (
     <Panel>
       <div className="border-b-2 border-gray-600 pb-2 text-center">
@@ -97,6 +101,14 @@ export function ShiftIntroScreen() {
         Target: layani {GAME_CONSTANTS.PATIENTS_PER_SHIFT} pasien. Tagihan harian{' '}
         {rupiah(GAME_CONSTANTS.DAILY_BILL)} dipotong di akhir shift.
       </div>
+      {modifier !== 'NONE' && (
+        <div className="mt-3 rounded border border-purple-700 bg-purple-950/40 p-3">
+          <div className="text-sm font-bold text-purple-300">
+            ⚡ Kejadian Malam Ini: {modInfo.title}
+          </div>
+          <p className="mt-1 text-xs text-gray-300">{modInfo.desc}</p>
+        </div>
+      )}
       <button className="win-btn mt-5 px-6 py-2 text-sm" onClick={beginShift}>
         Buka Loket ▶
       </button>

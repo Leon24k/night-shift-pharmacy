@@ -5,6 +5,7 @@ import type {
   Prescription,
   PrescriptionItem,
   RuleId,
+  ShiftModifier,
 } from '@/types';
 import { DRUG_BY_CODE, FORMULARY } from '@/data/formulary';
 import { DOCTOR_REGISTRY, FAKE_DOCTORS } from '@/data/doctorRegistry';
@@ -264,6 +265,27 @@ function makeRacikanAnak(rng: () => number): Patient {
   };
 }
 
+// LASA trap: keluhan perdarahan/mimisan tapi tertulis Asam MEFENAMAT (NSAID),
+// bukan Asam TRANEKSAMAT (antifibrinolitik). Nama mirip -> R4 mismatch, TOLAK.
+function makeLasaTrap(rng: () => number): Patient {
+  const doctor = pick(rng, VALID_DOCTORS);
+  const name = randomName(rng);
+  // tertulis obat yang keliru (mefenamat) untuk keluhan perdarahan
+  const rx = basePrescription(rng, doctor, name, randInt(rng, 20, 50), [
+    makeItem(rng, 'MEF500'),
+  ]);
+  rx.handwritingNoise = 0.7 + rng() * 0.3; // cakar ayam agar makin menjebak
+  return {
+    id: uid('pat'),
+    archetype: 'CALO_OOT',
+    displayName: name,
+    spokenComplaint: 'Saya sering mimisan dan perdarahan, kata dokter butuh asam traneksamat.',
+    prescription: rx,
+    shouldAccept: false,
+    isMysteryShopper: false,
+  };
+}
+
 // Pasien minta obat OWA tanpa resep (mis. CTM utk alergi). Apoteker BOLEH
 // menyerahkan sesuai batas OWA -> harus DITERIMA. (edukasi OWA)
 function makeOwaRequest(rng: () => number): Patient {
@@ -316,9 +338,13 @@ export function generateShift(opts: {
   mysteryShopperIndex?: number; // indeks pasien yang jadi mystery shopper
   compoundingUnlocked?: boolean; // racikan puyer muncul bila true
   copyResepUnlocked?: boolean; // stok kurang -> copy resep bila true
+  modifier?: ShiftModifier; // modifier lingkungan shift
 }): Patient[] {
   const rng = makeRng(opts.seed);
   const patients: Patient[] = [];
+  const modifier = opts.modifier ?? 'NONE';
+  const mismatchChance = modifier === 'RAMAI' ? 0.3 : 0.18;
+  const lasaChance = modifier === 'LASA_WASPADA' ? 0.35 : 0.08;
 
   // distribusi arketipe: pastikan campur valid & bermasalah
   const archetypePool: Array<Exclude<ArchetypeId, 'MYSTERY_SHOPPER'>> = [
@@ -336,9 +362,11 @@ export function generateShift(opts: {
   }
 
   for (let i = 0; i < opts.count; i++) {
-    // sisipkan mismatch (R4) sesekali
+    // sisipkan mismatch (R4) / LASA sesekali
     let patient: Patient;
-    if (chance(rng, 0.18)) {
+    if (chance(rng, lasaChance)) {
+      patient = makeLasaTrap(rng);
+    } else if (chance(rng, mismatchChance)) {
       patient = makeMismatch(rng);
     } else {
       const arch = pick(rng, archetypePool);
@@ -348,6 +376,13 @@ export function generateShift(opts: {
       } else {
         patient = BUILDERS[arch](rng);
       }
+    }
+    // cakar ayam: tingkatkan noise tulisan tangan
+    if (modifier === 'CAKAR_AYAM' && patient.prescription) {
+      patient.prescription.handwritingNoise = Math.min(
+        1,
+        patient.prescription.handwritingNoise + 0.4,
+      );
     }
     const isMystery = opts.mysteryShopperIndex === i;
     patients.push(finalize(patient, isMystery));

@@ -156,3 +156,12 @@ export interface DayRule {
   headline: string; // "koran" pengumuman aturan
   short: string;
 }
+
+// Modifier lingkungan acak per shift.
+export type ShiftModifier = 'NONE' | 'CAKAR_AYAM' | 'LASA_WASPADA' | 'RAMAI';
+
+export interface ShiftModifierInfo {
+  id: ShiftModifier;
+  title: string;
+  desc: string;
+}

@@ -5,6 +5,7 @@ import type {
   LabelColor,
   Patient,
   RuleId,
+  ShiftModifier,
   StampDecision,
 } from '@/types';
 import { generateShift } from '@/game/prescriptionGenerator';
@@ -12,6 +13,8 @@ import { verify } from '@/game/verification';
 import { rulesForDay, MAX_DAY, COPY_RESEP_UNLOCK_DAY } from '@/game/dayRules';
 import { playSfx } from '@/audio/sfx';
 import { DRUG_BY_CODE } from '@/data/formulary';
+import { rollShiftModifier } from '@/game/shiftModifiers';
+import { makeRng } from '@/game/rng';
 
 const PATIENTS_PER_SHIFT = 5;
 const STARTING_MONEY = 500_000;
@@ -29,6 +32,7 @@ interface GameState {
   phase: GamePhase;
   day: number;
   activeRules: RuleId[];
+  modifier: ShiftModifier;
 
   // shift
   queue: Patient[];
@@ -137,25 +141,29 @@ function applyJudgement(
   });
 }
 
-function makeQueue(day: number): Patient[] {
+function makeQueue(day: number): { queue: Patient[]; modifier: ShiftModifier } {
   const rules = rulesForDay(day);
+  const modifier = rollShiftModifier(day, makeRng((day * 7919 + 13) >>> 0));
   // mystery shopper mulai muncul hari 2, di posisi acak (indeks 2..4)
   const mysteryIndex =
     day >= 2 ? 2 + Math.floor(Math.random() * (PATIENTS_PER_SHIFT - 2)) : -1;
-  return generateShift({
+  const queue = generateShift({
     seed: (day * 1000 + Date.now()) >>> 0,
     count: PATIENTS_PER_SHIFT,
     activeRules: rules,
     mysteryShopperIndex: mysteryIndex,
     compoundingUnlocked: day >= DISPENSING_UNLOCK_DAY,
     copyResepUnlocked: day >= COPY_RESEP_UNLOCK_DAY,
+    modifier,
   });
+  return { queue, modifier };
 }
 
 export const useGame = create<GameState>((set, get) => ({
   phase: 'TITLE',
   day: 1,
   activeRules: rulesForDay(1),
+  modifier: 'NONE',
   queue: [],
   currentIndex: 0,
   currentPatient: null,
@@ -177,10 +185,11 @@ export const useGame = create<GameState>((set, get) => ({
   beginShift: () => {
     const { day } = get();
     const rules = rulesForDay(day);
-    const queue = makeQueue(day);
+    const { queue, modifier } = makeQueue(day);
     set({
       phase: 'PLAYING',
       activeRules: rules,
+      modifier,
       queue,
       currentIndex: 0,
       currentPatient: queue[0] ?? null,

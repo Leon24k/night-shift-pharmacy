@@ -10,6 +10,7 @@ import { MortarGame } from './MortarGame';
 import { CopyResepModal } from './CopyResepModal';
 import { rupiah } from '@/lib/format';
 import { playSfx, toggleMute, isMuted, unlockAudio } from '@/audio/sfx';
+import { SHIFT_MODIFIERS } from '@/game/shiftModifiers';
 
 export function GameLayout() {
   const {
@@ -21,6 +22,7 @@ export function GameLayout() {
     currentIndex,
     currentPatient,
     activeRules,
+    modifier,
     decide,
     nextPatient,
   } = useGame();
@@ -56,6 +58,11 @@ export function GameLayout() {
       {/* HUD atas: papan neon + status */}
       <div className="flex items-center justify-between border-b border-cyan-900/40 bg-slate-950 px-4 py-1 text-xs text-gray-300">
         <span className="neon font-bold text-cyan-300">APOTEK JAGA · SHIFT MALAM</span>
+        {modifier !== 'NONE' && (
+          <span className="rounded bg-purple-800 px-2 py-0.5 text-[10px] text-purple-100">
+            ⚡ {SHIFT_MODIFIERS[modifier].title}
+          </span>
+        )}
         <div className="flex gap-4">
           <span>Hari <b className="text-cyan-200">{day}</b></span>
           <span>
