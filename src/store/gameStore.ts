@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type {
   GamePhase,
   Judgement,
+  LabelColor,
   Patient,
   RuleId,
   StampDecision,
@@ -9,6 +10,8 @@ import type {
 import { generateShift } from '@/game/prescriptionGenerator';
 import { verify } from '@/game/verification';
 import { rulesForDay, MAX_DAY } from '@/game/dayRules';
+import { playSfx } from '@/audio/sfx';
+import { DRUG_BY_CODE } from '@/data/formulary';
 
 const PATIENTS_PER_SHIFT = 5;
 const STARTING_MONEY = 500_000;
@@ -19,6 +22,8 @@ const REWARD_CORRECT = 40_000;
 const PENALTY_WRONG = 30_000;
 const PENALTY_MYSTERY_FAIL = 250_000; // sidak lolos = fatal
 const DAILY_BILL = 120_000; // tagihan harian
+const PENALTY_LABEL = 15_000; // salah warna etiket
+const DISPENSING_UNLOCK_DAY = 3; // etiket mulai wajib di hari ke-3
 
 interface GameState {
   phase: GamePhase;
@@ -39,14 +44,69 @@ interface GameState {
   judgements: Judgement[];
   lastJudgement: Judgement | null;
 
+  // dispensing (etiket)
+  dispenseItems: DispenseItem[];
+
   // actions
   startGame: () => void;
   setPhase: (phase: GamePhase) => void;
   beginShift: () => void;
   decide: (decision: StampDecision) => void;
+  finishDispensing: (labels: LabelColor[]) => void;
   nextPatient: () => void;
   nextDay: () => void;
   resetGame: () => void;
+}
+
+export interface DispenseItem {
+  drugName: string;
+  correctLabel: LabelColor; // PUTIH utk DALAM, BIRU utk LUAR
+}
+
+type SetFn = (partial: Partial<GameState>) => void;
+type GetFn = () => GameState;
+
+// Finalisasi judgement: terapkan uang/reputasi/peringatan, SFX, pindah ke FEEDBACK.
+function applyJudgement(
+  set: SetFn,
+  get: GetFn,
+  judgement: Judgement,
+  ctx: { shouldAccept: boolean; playerAccepted: boolean; skipSfx?: boolean },
+) {
+  const state = get();
+  const patient = state.currentPatient;
+  const isMysteryFail =
+    !!patient?.isMysteryShopper &&
+    !ctx.shouldAccept &&
+    ctx.playerAccepted &&
+    !judgement.correct;
+
+  const newWarnings =
+    state.warnings +
+    (!judgement.correct && !patient?.isMysteryShopper ? 1 : 0);
+
+  if (!ctx.skipSfx) {
+    setTimeout(() => {
+      if (isMysteryFail) playSfx('alarm');
+      else if (judgement.correct) playSfx('correct');
+      else playSfx('wrong');
+    }, 180);
+  } else if (isMysteryFail) {
+    setTimeout(() => playSfx('alarm'), 180);
+  }
+
+  set({
+    phase: 'FEEDBACK',
+    money: state.money + judgement.moneyDelta,
+    reputation: Math.max(
+      0,
+      Math.min(100, state.reputation + judgement.reputationDelta),
+    ),
+    warnings: newWarnings,
+    judgements: [...state.judgements, judgement],
+    lastJudgement: judgement,
+    dispenseItems: [],
+  });
 }
 
 function makeQueue(day: number): Patient[] {
@@ -74,6 +134,7 @@ export const useGame = create<GameState>((set, get) => ({
   warnings: 0,
   judgements: [],
   lastJudgement: null,
+  dispenseItems: [],
 
   startGame: () => {
     set({ phase: 'ONBOARDING' });
@@ -100,6 +161,8 @@ export const useGame = create<GameState>((set, get) => ({
     const state = get();
     const patient = state.currentPatient;
     if (!patient) return;
+
+    playSfx('stampWood');
 
     const result = verify(patient, state.activeRules);
     const shouldAccept = !result.hasViolation;
@@ -149,16 +212,67 @@ export const useGame = create<GameState>((set, get) => ({
       wasMysteryShopper: patient.isMysteryShopper,
     };
 
-    const newWarnings =
-      state.warnings + (!correct && !patient.isMysteryShopper ? 1 : 0);
+    // Jika benar-menerima resep berisi obat & dispensing sudah ter-unlock,
+    // masuk tahap DISPENSING (pilih etiket) sebelum feedback final.
+    const hasItems = !!patient.prescription && patient.prescription.items.length > 0;
+    if (
+      correct &&
+      playerAccepted &&
+      hasItems &&
+      state.day >= DISPENSING_UNLOCK_DAY
+    ) {
+      const dispenseItems: DispenseItem[] = patient.prescription!.items.map(
+        (i) => {
+          const drug = DRUG_BY_CODE[i.drugCode];
+          return {
+            drugName: drug?.name ?? i.drugName,
+            correctLabel: drug?.route === 'LUAR' ? 'BIRU' : 'PUTIH',
+          };
+        },
+      );
+      set({
+        phase: 'DISPENSING',
+        dispenseItems,
+        lastJudgement: judgement, // simpan sementara, difinalisasi setelah etiket
+      });
+      return;
+    }
 
-    set({
-      phase: 'FEEDBACK',
-      money: state.money + moneyDelta,
-      reputation: Math.max(0, Math.min(100, state.reputation + reputationDelta)),
-      warnings: newWarnings,
-      judgements: [...state.judgements, judgement],
-      lastJudgement: judgement,
+    applyJudgement(set, get, judgement, { shouldAccept, playerAccepted });
+  },
+
+  finishDispensing: (labels) => {
+    const state = get();
+    const base = state.lastJudgement;
+    if (!base) return;
+
+    playSfx('paperSlide');
+
+    // hitung salah etiket
+    let wrong = 0;
+    state.dispenseItems.forEach((item, idx) => {
+      if (labels[idx] !== item.correctLabel) wrong++;
+    });
+
+    let judgement = base;
+    if (wrong > 0) {
+      const penalty = wrong * PENALTY_LABEL;
+      judgement = {
+        ...base,
+        correct: false,
+        moneyDelta: base.moneyDelta - penalty,
+        reputationDelta: base.reputationDelta - wrong * 3,
+        reason: `${base.reason} Namun ${wrong} etiket salah warna (dalam=putih, luar=biru). Denda kepatuhan ${penalty.toLocaleString('id-ID')}.`,
+      };
+      setTimeout(() => playSfx('wrong'), 150);
+    } else {
+      setTimeout(() => playSfx('correct'), 150);
+    }
+
+    applyJudgement(set, get, judgement, {
+      shouldAccept: true,
+      playerAccepted: true,
+      skipSfx: true,
     });
   },
 
@@ -224,6 +338,7 @@ export const useGame = create<GameState>((set, get) => ({
       warnings: 0,
       judgements: [],
       lastJudgement: null,
+      dispenseItems: [],
     });
   },
 }));
@@ -233,4 +348,5 @@ export const GAME_CONSTANTS = {
   STARTING_MONEY,
   DAILY_BILL,
   MAX_DAY,
+  DISPENSING_UNLOCK_DAY,
 };

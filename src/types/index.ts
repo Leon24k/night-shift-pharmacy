@@ -136,9 +136,12 @@ export type GamePhase =
   | 'ONBOARDING'
   | 'SHIFT_INTRO'
   | 'PLAYING'
+  | 'DISPENSING'
   | 'FEEDBACK'
   | 'SHIFT_SUMMARY'
   | 'GAME_OVER';
+
+export type LabelColor = 'PUTIH' | 'BIRU';
 
 export interface DayRule {
   rule: RuleId;

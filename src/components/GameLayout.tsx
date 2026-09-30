@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useGame, GAME_CONSTANTS } from '@/store/gameStore';
 import { SimApotek } from './SimApotek';
 import { PrescriptionPaper } from './PrescriptionPaper';
 import { PatientWindow } from './PatientWindow';
 import { StampTray } from './StampTray';
 import { FeedbackOverlay } from './FeedbackOverlay';
+import { DispensingModal } from './DispensingModal';
 import { rupiah } from '@/lib/format';
+import { playSfx, toggleMute, isMuted, unlockAudio } from '@/audio/sfx';
 
 export function GameLayout() {
   const {
@@ -20,6 +22,18 @@ export function GameLayout() {
     decide,
     nextPatient,
   } = useGame();
+
+  const [mutedState, setMutedState] = useState(isMuted());
+
+  // buka AudioContext pada mount (dipicu oleh interaksi tombol "Buka Loket")
+  useEffect(() => {
+    unlockAudio();
+  }, []);
+
+  // SFX gesekan kertas saat pasien baru datang
+  useEffect(() => {
+    if (currentPatient) playSfx('paperSlide');
+  }, [currentPatient?.id]);
 
   // keyboard: A=terima, D=tolak, Enter=lanjut
   useEffect(() => {
@@ -49,6 +63,13 @@ export function GameLayout() {
           <span>Kas: <b className="text-green-300">{rupiah(money)}</b></span>
           <span>Reputasi: <b className={reputation < 40 ? 'text-red-400' : 'text-green-300'}>{reputation}</b></span>
           <span>Peringatan: <b className={warnings > 0 ? 'text-amber-400' : 'text-gray-400'}>{warnings}</b></span>
+          <button
+            className="rounded border border-cyan-800 px-2 text-cyan-300 hover:bg-cyan-950"
+            onClick={() => setMutedState(toggleMute())}
+            title="Bisukan/nyalakan suara"
+          >
+            {mutedState ? '🔇' : '🔊'}
+          </button>
         </div>
       </div>
 
@@ -109,6 +130,7 @@ export function GameLayout() {
       </div>
 
       {phase === 'FEEDBACK' && <FeedbackOverlay />}
+      {phase === 'DISPENSING' && <DispensingModal />}
     </div>
   );
 }
