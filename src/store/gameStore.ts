@@ -46,12 +46,14 @@ interface GameState {
 
   // dispensing (etiket)
   dispenseItems: DispenseItem[];
+  pulvTarget: number; // jumlah bungkus puyer target (racikan)
 
   // actions
   startGame: () => void;
   setPhase: (phase: GamePhase) => void;
   beginShift: () => void;
   decide: (decision: StampDecision) => void;
+  finishCompounding: () => void;
   finishDispensing: (labels: LabelColor[]) => void;
   nextPatient: () => void;
   nextDay: () => void;
@@ -119,6 +121,7 @@ function makeQueue(day: number): Patient[] {
     count: PATIENTS_PER_SHIFT,
     activeRules: rules,
     mysteryShopperIndex: mysteryIndex,
+    compoundingUnlocked: day >= DISPENSING_UNLOCK_DAY,
   });
 }
 
@@ -135,6 +138,7 @@ export const useGame = create<GameState>((set, get) => ({
   judgements: [],
   lastJudgement: null,
   dispenseItems: [],
+  pulvTarget: 0,
 
   startGame: () => {
     set({ phase: 'ONBOARDING' });
@@ -221,24 +225,46 @@ export const useGame = create<GameState>((set, get) => ({
       hasItems &&
       state.day >= DISPENSING_UNLOCK_DAY
     ) {
-      const dispenseItems: DispenseItem[] = patient.prescription!.items.map(
-        (i) => {
+      const items = patient.prescription!.items;
+      const hasCompound = items.some((i) => i.compound);
+      const pulvTarget =
+        items.find((i) => i.compound)?.pulvCount ?? 0;
+
+      // etiket: obat racikan puyer digabung jadi satu entri "Puyer racikan" (dalam)
+      const compoundItems = items.filter((i) => i.compound);
+      const nonCompound = items.filter((i) => !i.compound);
+      const dispenseItems: DispenseItem[] = [
+        ...nonCompound.map((i) => {
           const drug = DRUG_BY_CODE[i.drugCode];
           return {
             drugName: drug?.name ?? i.drugName,
-            correctLabel: drug?.route === 'LUAR' ? 'BIRU' : 'PUTIH',
+            correctLabel: (drug?.route === 'LUAR' ? 'BIRU' : 'PUTIH') as DispenseItem['correctLabel'],
           };
-        },
-      );
+        }),
+        ...(compoundItems.length > 0
+          ? [
+              {
+                drugName: `Puyer racikan (${compoundItems.length} bahan)`,
+                correctLabel: 'PUTIH' as DispenseItem['correctLabel'],
+              },
+            ]
+          : []),
+      ];
+
       set({
-        phase: 'DISPENSING',
         dispenseItems,
         lastJudgement: judgement, // simpan sementara, difinalisasi setelah etiket
+        pulvTarget,
+        phase: hasCompound ? 'COMPOUNDING' : 'DISPENSING',
       });
       return;
     }
 
     applyJudgement(set, get, judgement, { shouldAccept, playerAccepted });
+  },
+
+  finishCompounding: () => {
+    set({ phase: 'DISPENSING' });
   },
 
   finishDispensing: (labels) => {

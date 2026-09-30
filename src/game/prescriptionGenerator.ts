@@ -214,6 +214,48 @@ function makeMismatch(rng: () => number): Patient {
   };
 }
 
+// Racikan puyer anak: Paracetamol + CTM, m.f. pulv dtd No. X (valid).
+function makeRacikanAnak(rng: () => number): Patient {
+  const doctor = pick(rng, VALID_DOCTORS);
+  const name = `An. ${pick(rng, FIRST_NAMES)}`;
+  const pulvCount = pick(rng, [6, 9, 10, 12]);
+  const pctSigna = buildSigna({
+    frequencyPerDay: 3,
+    amountPerDose: 1,
+    route: 'DALAM',
+    unit: 'tab',
+    timing: 'p.c.',
+  });
+  const items: PrescriptionItem[] = [
+    {
+      drugCode: 'PCT500',
+      drugName: 'Paracetamol 150 mg',
+      quantity: pulvCount,
+      signa: { ...pctSigna, raw: 'm.f. pulv dtd No. ' },
+      compound: true,
+      pulvCount,
+    },
+    {
+      drugCode: 'CTM04',
+      drugName: 'CTM 1 mg',
+      quantity: pulvCount,
+      signa: pctSigna,
+      compound: true,
+      pulvCount,
+    },
+  ];
+  const rx = basePrescription(rng, doctor, name, randInt(rng, 2, 8), items);
+  return {
+    id: uid('pat'),
+    archetype: 'RACIKAN_ANAK',
+    displayName: name,
+    spokenComplaint: 'Anak saya demam dan pilek, ini resep puyer dari dokter.',
+    prescription: rx,
+    shouldAccept: true,
+    isMysteryShopper: false,
+  };
+}
+
 const BUILDERS: Record<
   Exclude<ArchetypeId, 'MYSTERY_SHOPPER'>,
   (rng: () => number) => Patient
@@ -222,6 +264,7 @@ const BUILDERS: Record<
   IBU_PANIK: makeIbuPanik,
   CALO_OOT: makeCaloOOT,
   KRONIS: makeKronis,
+  RACIKAN_ANAK: makeRacikanAnak,
 };
 
 // Finalisasi: hitung ground-truth shouldAccept lewat engine (semua aturan aktif),
@@ -242,6 +285,7 @@ export function generateShift(opts: {
   count: number;
   activeRules: RuleId[];
   mysteryShopperIndex?: number; // indeks pasien yang jadi mystery shopper
+  compoundingUnlocked?: boolean; // racikan puyer muncul bila true
 }): Patient[] {
   const rng = makeRng(opts.seed);
   const patients: Patient[] = [];
@@ -254,6 +298,9 @@ export function generateShift(opts: {
     'CALO_OOT',
     'KRONIS',
   ];
+  if (opts.compoundingUnlocked) {
+    archetypePool.push('RACIKAN_ANAK', 'RACIKAN_ANAK');
+  }
 
   for (let i = 0; i < opts.count; i++) {
     // sisipkan mismatch (R4) sesekali

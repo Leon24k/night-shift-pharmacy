@@ -6,6 +6,7 @@ import { PatientWindow } from './PatientWindow';
 import { StampTray } from './StampTray';
 import { FeedbackOverlay } from './FeedbackOverlay';
 import { DispensingModal } from './DispensingModal';
+import { MortarGame } from './MortarGame';
 import { rupiah } from '@/lib/format';
 import { playSfx, toggleMute, isMuted, unlockAudio } from '@/audio/sfx';
 
@@ -130,6 +131,7 @@ export function GameLayout() {
       </div>
 
       {phase === 'FEEDBACK' && <FeedbackOverlay />}
+      {phase === 'COMPOUNDING' && <MortarGame />}
       {phase === 'DISPENSING' && <DispensingModal />}
     </div>
   );

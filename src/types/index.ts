@@ -61,6 +61,8 @@ export interface PrescriptionItem {
   drugName: string; // seperti tertulis di resep (bisa beda dari master utk perangkap)
   quantity: number; // No. XV -> 15
   signa: Signa;
+  compound?: boolean; // true jika bagian dari racikan puyer (m.f. pulv)
+  pulvCount?: number; // jumlah bungkus puyer (dtd No. X)
 }
 
 export interface Prescription {
@@ -88,6 +90,7 @@ export type ArchetypeId =
   | 'IBU_PANIK'
   | 'CALO_OOT'
   | 'KRONIS'
+  | 'RACIKAN_ANAK'
   | 'MYSTERY_SHOPPER';
 
 export interface Patient {
@@ -136,6 +139,7 @@ export type GamePhase =
   | 'ONBOARDING'
   | 'SHIFT_INTRO'
   | 'PLAYING'
+  | 'COMPOUNDING'
   | 'DISPENSING'
   | 'FEEDBACK'
   | 'SHIFT_SUMMARY'

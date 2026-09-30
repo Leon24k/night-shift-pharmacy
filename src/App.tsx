@@ -16,9 +16,10 @@ export default function App() {
       {phase === 'TITLE' && <TitleScreen />}
       {phase === 'ONBOARDING' && <OnboardingScreen />}
       {phase === 'SHIFT_INTRO' && <ShiftIntroScreen />}
-      {(phase === 'PLAYING' || phase === 'FEEDBACK' || phase === 'DISPENSING') && (
-        <GameLayout />
-      )}
+      {(phase === 'PLAYING' ||
+        phase === 'FEEDBACK' ||
+        phase === 'COMPOUNDING' ||
+        phase === 'DISPENSING') && <GameLayout />}
       {phase === 'SHIFT_SUMMARY' && <ShiftSummaryScreen />}
       {phase === 'GAME_OVER' && <GameOverScreen />}
     </div>

@@ -88,23 +88,57 @@ export function PrescriptionPaper({ prescription: rx }: Props) {
 
         {/* Invocatio + Ordinatio */}
         <div className="mt-2" style={{ transform: `skewX(${skew}deg)` }}>
-          {rx.items.map((item, i) => (
-            <div key={i} className="mb-3">
-              <div className="text-[15px]">
-                <span className="mr-2 font-bold italic">R/</span>
-                {item.drugName} No. {toRoman(item.quantity)}
-              </div>
-              <div className="pl-8 text-[13px] italic">S {item.signa.raw.replace(/^s /, '')}</div>
-              {/* paraf per item */}
-              <div className="pl-8 text-[13px]">
-                {rx.signed ? (
-                  <span className="italic opacity-70">— paraf —</span>
-                ) : (
-                  <span className="italic text-red-700/70">(tanpa paraf)</span>
+          {(() => {
+            const compounds = rx.items.filter((i) => i.compound);
+            const singles = rx.items.filter((i) => !i.compound);
+            return (
+              <>
+                {compounds.length > 0 && (
+                  <div className="mb-3">
+                    <div className="text-[15px]">
+                      <span className="mr-2 font-bold italic">R/</span>
+                    </div>
+                    {compounds.map((c, i) => (
+                      <div key={i} className="pl-6 text-[14px]">
+                        {c.drugName}
+                      </div>
+                    ))}
+                    <div className="pl-6 text-[13px] italic">
+                      m.f. pulv dtd No. {toRoman(compounds[0].pulvCount ?? compounds[0].quantity)}
+                    </div>
+                    <div className="pl-6 text-[13px] italic">
+                      S 3 dd pulv 1 p.c.
+                    </div>
+                    <div className="pl-6 text-[13px]">
+                      {rx.signed ? (
+                        <span className="italic opacity-70">— paraf —</span>
+                      ) : (
+                        <span className="italic text-red-700/70">(tanpa paraf)</span>
+                      )}
+                    </div>
+                  </div>
                 )}
-              </div>
-            </div>
-          ))}
+                {singles.map((item, i) => (
+                  <div key={i} className="mb-3">
+                    <div className="text-[15px]">
+                      <span className="mr-2 font-bold italic">R/</span>
+                      {item.drugName} No. {toRoman(item.quantity)}
+                    </div>
+                    <div className="pl-8 text-[13px] italic">
+                      S {item.signa.raw.replace(/^s /, '')}
+                    </div>
+                    <div className="pl-8 text-[13px]">
+                      {rx.signed ? (
+                        <span className="italic opacity-70">— paraf —</span>
+                      ) : (
+                        <span className="italic text-red-700/70">(tanpa paraf)</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </>
+            );
+          })()}
         </div>
 
         {/* Pro */}
@@ -124,6 +158,10 @@ export function PrescriptionPaper({ prescription: rx }: Props) {
 
 function toRoman(n: number): string {
   const map: Array<[number, string]> = [
+    [100, 'C'],
+    [90, 'XC'],
+    [50, 'L'],
+    [40, 'XL'],
     [10, 'X'],
     [9, 'IX'],
     [5, 'V'],
