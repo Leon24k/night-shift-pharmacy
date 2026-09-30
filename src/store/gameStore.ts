@@ -154,6 +154,7 @@ function makeQueue(day: number): { queue: Patient[]; modifier: ShiftModifier } {
     mysteryShopperIndex: mysteryIndex,
     compoundingUnlocked: day >= DISPENSING_UNLOCK_DAY,
     copyResepUnlocked: day >= COPY_RESEP_UNLOCK_DAY,
+    dmUnlocked: rules.includes('R5'),
     modifier,
   });
   return { queue, modifier };

@@ -317,6 +317,44 @@ function makeOwaRequest(rng: () => number): Patient {
   };
 }
 
+// Resep anak dengan dosis melebihi DM (overdosis) -> harus DITOLAK (R5).
+// Contoh: anak 4 th diberi Amoxicillin 500mg 3x1 (1500 mg/hari) — jauh di
+// atas DM anak (Young: 4/16 x 1500 = 375 mg/hari).
+function makeOverdosisAnak(rng: () => number): Patient {
+  const doctor = pick(rng, VALID_DOCTORS);
+  const name = `An. ${pick(rng, FIRST_NAMES)}`;
+  const age = randInt(rng, 2, 6);
+  // pilih obat dengan DM dewasa relatif rendah agar dosis dewasa penuh
+  // dijamin melebihi DM anak (fraksi Young < 0.34 pada usia <=6).
+  const code = pick(rng, ['AMX500', 'MEF500', 'CPX500']);
+  const drug = DRUG_BY_CODE[code];
+  const item: PrescriptionItem = {
+    drugCode: code,
+    drugName: drug.name,
+    quantity: 15,
+    signa: buildSigna({
+      frequencyPerDay: 3,
+      amountPerDose: 1,
+      route: 'DALAM',
+      unit: 'tab',
+      timing: 'p.c.',
+    }),
+  };
+  const rx = basePrescription(rng, doctor, name, age, [item], {
+    patientWeightKg: null, // pakai rumus Young (umur)
+  });
+  const complaint = pick(rng, drug.indication);
+  return {
+    id: uid('pat'),
+    archetype: 'OVERDOSIS_ANAK',
+    displayName: name,
+    spokenComplaint: `Anak saya ${complaint}, ini resep dari dokter.`,
+    prescription: rx,
+    shouldAccept: false, // overdosis -> tolak (dihitung ulang di finalize)
+    isMysteryShopper: false,
+  };
+}
+
 const BUILDERS: Record<
   Exclude<ArchetypeId, 'MYSTERY_SHOPPER'>,
   (rng: () => number) => Patient
@@ -327,12 +365,13 @@ const BUILDERS: Record<
   KRONIS: makeKronis,
   RACIKAN_ANAK: makeRacikanAnak,
   OWA_REQUEST: makeOwaRequest,
+  OVERDOSIS_ANAK: makeOverdosisAnak,
 };
 
 // Finalisasi: hitung ground-truth shouldAccept lewat engine (semua aturan aktif),
 // agar generator & verifikasi selalu konsisten.
 function finalize(patient: Patient, mysteryShopper: boolean): Patient {
-  const allRules: RuleId[] = ['R1', 'R2', 'R3', 'R4'];
+  const allRules: RuleId[] = ['R1', 'R2', 'R3', 'R4', 'R5'];
   const res = verify(patient, allRules);
   return {
     ...patient,
@@ -349,6 +388,7 @@ export function generateShift(opts: {
   mysteryShopperIndex?: number; // indeks pasien yang jadi mystery shopper
   compoundingUnlocked?: boolean; // racikan puyer muncul bila true
   copyResepUnlocked?: boolean; // stok kurang -> copy resep bila true
+  dmUnlocked?: boolean; // R5 DM anak aktif -> overdosis anak muncul
   modifier?: ShiftModifier; // modifier lingkungan shift
 }): Patient[] {
   const rng = makeRng(opts.seed);
@@ -370,6 +410,9 @@ export function generateShift(opts: {
   }
   if (opts.copyResepUnlocked) {
     archetypePool.push('OWA_REQUEST');
+  }
+  if (opts.dmUnlocked) {
+    archetypePool.push('OVERDOSIS_ANAK', 'RACIKAN_ANAK');
   }
 
   for (let i = 0; i < opts.count; i++) {

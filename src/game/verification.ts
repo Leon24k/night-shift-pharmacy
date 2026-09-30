@@ -7,6 +7,7 @@ import type {
 import { DRUG_BY_CODE, requiresPrescription } from '@/data/formulary';
 import { lookupDoctor } from '@/data/doctorRegistry';
 import { isOwa } from '@/data/owaList';
+import { pediatricMaxDaily } from './doseCalc';
 
 // Tanggal "sekarang" dalam dunia game (untuk cek kadaluarsa SIP & umur resep).
 export const GAME_TODAY = new Date('2026-09-30');
@@ -152,6 +153,35 @@ function checkR4(patient: Patient): Violation | null {
   return null;
 }
 
+// R5: Dosis Maksimum (DM) anak. Untuk pasien < 12 th, dosis harian resep
+// tidak boleh melebihi DM anak (fraksi dari DM dewasa).
+function checkR5(patient: Patient): Violation | null {
+  const p = patient.prescription;
+  if (!p) return null;
+  if (p.patientAgeYears >= 12) return null; // hanya anak
+  for (const item of p.items) {
+    const drug = DRUG_BY_CODE[item.drugCode];
+    if (!drug || drug.maxDailyMg == null || drug.strengthMg == null) continue;
+    if (item.compound) continue; // racikan sudah disesuaikan dokter
+    const dailyMg =
+      item.signa.frequencyPerDay * item.signa.amountPerDose * drug.strengthMg;
+    const { maxDailyMg, formula } = pediatricMaxDaily(
+      drug.maxDailyMg,
+      p.patientAgeYears,
+      p.patientWeightKg,
+    );
+    // toleransi 5% untuk pembulatan
+    if (dailyMg > maxDailyMg * 1.05) {
+      return {
+        rule: 'R5',
+        title: 'Dosis melebihi DM anak',
+        detail: `${drug.name}: dosis harian ${Math.round(dailyMg)} mg melebihi DM anak ${Math.round(maxDailyMg)} mg (rumus ${formula}, usia ${p.patientAgeYears} th${p.patientWeightKg ? `, BB ${p.patientWeightKg} kg` : ''}). Berisiko overdosis.`,
+      };
+    }
+  }
+  return null;
+}
+
 // Verifikasi terhadap aturan yang AKTIF pada hari ini.
 export function verify(
   patient: Patient,
@@ -167,6 +197,7 @@ export function verify(
   }
   if (active.has('R3')) all.push(checkR3(patient));
   if (active.has('R4')) all.push(checkR4(patient));
+  if (active.has('R5')) all.push(checkR5(patient));
 
   const violations = all.filter((v): v is Violation => v !== null);
   return { violations, hasViolation: violations.length > 0 };

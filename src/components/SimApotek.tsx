@@ -4,6 +4,7 @@ import { FORMULARY, DRUG_BY_CODE } from '@/data/formulary';
 import { DOCTOR_REGISTRY, lookupDoctor } from '@/data/doctorRegistry';
 import { findInteractions } from '@/data/interactions';
 import { isOwa, OWA_BY_CODE } from '@/data/owaList';
+import { pediatricMaxDaily, FORMULA_LABEL } from '@/game/doseCalc';
 import { rupiah } from '@/lib/format';
 
 type Tab = 'F1' | 'F2' | 'F3' | 'F4';
@@ -214,6 +215,7 @@ function TebusResep({
   }, 0);
 
   return (
+    <>
     <table className="w-full border-collapse text-[11px]">
       <thead>
         <tr className="bg-gray-200 text-left">
@@ -257,6 +259,8 @@ function TebusResep({
         </tfoot>
       )}
     </table>
+    <PediatricDose patient={patient} />
+    </>
   );
 }
 
@@ -357,4 +361,43 @@ function MasterSip({
 
 function Empty({ children }: { children: React.ReactNode }) {
   return <div className="p-3 text-[11px] text-win-shadow">{children}</div>;
+}
+
+// Kalkulator DM anak untuk pasien < 12 th (edukatif, membantu cek R5).
+function PediatricDose({ patient }: { patient: Patient }) {
+  if (!patient.prescription) return null;
+  const { patientAgeYears: age, patientWeightKg: bb } = patient.prescription;
+  if (age >= 12) return null;
+  const rows = patient.prescription.items
+    .map((i) => {
+      const d = DRUG_BY_CODE[i.drugCode];
+      if (!d || d.maxDailyMg == null || d.strengthMg == null || i.compound) return null;
+      const daily = i.signa.frequencyPerDay * i.signa.amountPerDose * d.strengthMg;
+      const { maxDailyMg, formula } = pediatricMaxDaily(d.maxDailyMg, age, bb);
+      const over = daily > maxDailyMg * 1.05;
+      return { name: d.name, daily, maxDailyMg, formula, over };
+    })
+    .filter(Boolean) as {
+    name: string;
+    daily: number;
+    maxDailyMg: number;
+    formula: string;
+    over: boolean;
+  }[];
+  if (rows.length === 0) return null;
+
+  return (
+    <div className="mt-2 border-t border-gray-300 p-1 text-[10px]">
+      <div className="font-bold text-blue-800">
+        🧮 Kalkulator DM Anak (usia {age} th{bb ? `, BB ${bb} kg` : ''})
+      </div>
+      {rows.map((r, i) => (
+        <div key={i} className={r.over ? 'text-red-700' : 'text-gray-700'}>
+          {r.name}: dosis {Math.round(r.daily)} mg/hari vs DM {Math.round(r.maxDailyMg)} mg
+          {' '}({FORMULA_LABEL[r.formula as keyof typeof FORMULA_LABEL]}){' '}
+          {r.over ? '⚠ MELEBIHI DM!' : '✓ aman'}
+        </div>
+      ))}
+    </div>
+  );
 }

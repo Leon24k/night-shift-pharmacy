@@ -94,6 +94,7 @@ export type ArchetypeId =
   | 'KRONIS'
   | 'RACIKAN_ANAK'
   | 'OWA_REQUEST'
+  | 'OVERDOSIS_ANAK'
   | 'MYSTERY_SHOPPER';
 
 export interface Patient {
