@@ -14,14 +14,17 @@
   <text x="14" y="19" font-family="system-ui, sans-serif" font-size="12" font-weight="800" fill="#67e8f9">APOTEK JAGA · SHIFT MALAM</text>
   <text x="820" y="19" font-family="system-ui, sans-serif" font-size="11" fill="#86efac">Kas: Rp 620.000</text>
 
-  <!-- caption that changes per step -->
-  <text x="480" y="512" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#cbd5e1">
-    <tspan>Pasien datang ke loket…</tspan>
-    <animate attributeName="opacity" values="1;1;1;1" dur="12s" repeatCount="indefinite"/>
-  </text>
+  <!-- caption that changes per step (each fades in/out in its own slot, no overlap) -->
   <g font-family="system-ui, sans-serif" font-size="15" fill="#cbd5e1" text-anchor="middle">
-    <text x="480" y="512" opacity="0">Baca resep &amp; cek SIM-Apotek…<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.25;0.33;0.5;0.58;1" dur="12s" repeatCount="indefinite"/></text>
-    <text x="480" y="512" opacity="0">SIP kadaluarsa terdeteksi → TOLAK<animate attributeName="opacity" values="0;0;0;0;1;1;0;0" keyTimes="0;0.5;0.58;0.62;0.66;0.82;0.9;1" dur="12s" repeatCount="indefinite"/></text>
+    <text x="480" y="512" opacity="0">Pasien datang ke loket…
+      <animate attributeName="opacity" values="0;1;1;0;0;0;0" keyTimes="0;0.04;0.20;0.26;0.30;0.99;1" dur="12s" repeatCount="indefinite"/>
+    </text>
+    <text x="480" y="512" opacity="0">Baca resep &amp; cek SIM-Apotek…
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.30;0.36;0.56;0.62;1" dur="12s" repeatCount="indefinite"/>
+    </text>
+    <text x="480" y="512" opacity="0">SIP kadaluarsa terdeteksi → TOLAK
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.62;0.68;0.86;0.92;1" dur="12s" repeatCount="indefinite"/>
+    </text>
   </g>
 
   <!-- prescription paper sliding in -->
